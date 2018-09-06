@@ -27,11 +27,6 @@ test_data = [
 ]
 
 
-# @pytest.mark.parametrize('expected, args', test_data)
-# def test_iteration(expected, args):
-#     assert iteration(args[0], args[1]) == expected
-
-
 @pytest.mark.parametrize('expected, args', test_data)
 def test_binary_chop_recursive(expected, args):
     assert binary_chop_recursive(args[0], args[1]) == expected

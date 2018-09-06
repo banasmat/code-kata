@@ -1,13 +1,6 @@
 # http://codekata.com/kata/kata02-karate-chop/
 
 
-def iteration(needle, haystack):
-    for i, num in enumerate(haystack):
-        if num == needle:
-            return i
-    return -1
-
-
 # errors:
 # we don't have initial index when recurring
 def binary_chop_recursive(_needle, _haystack):
