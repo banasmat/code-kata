@@ -34,3 +34,7 @@ def test_binary_chop_recursive(expected, args):
 @pytest.mark.parametrize('expected, args', test_data)
 def test_binary_chop_iteration(expected, args):
     assert binary_chop_iteration(args[0], args[1]) == expected
+
+@pytest.mark.parametrize('expected, args', test_data)
+def test_binary_chop_while_iteration(expected, args):
+    assert binary_chop_while_iteration(args[0], args[1]) == expected

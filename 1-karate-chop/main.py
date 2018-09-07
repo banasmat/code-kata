@@ -24,7 +24,7 @@ def binary_chop_recursive(_needle, _haystack):
     return __binary_chop(_needle, _haystack, 0)
 
 
-# every time i have to look at test data and go step by step
+# note: every time i have to look at test data and go step by step
 # error: check if count is zero
 # remembered from previous: modify the main index to keep track on whole index, not active chunk
 def binary_chop_iteration(needle, haystack):
@@ -46,3 +46,34 @@ def binary_chop_iteration(needle, haystack):
 
     return -1
 
+
+# errors: endless loop
+# note: at one point failed only my additional test
+# note: I'm not happy that I had to use i and max_iterations
+def binary_chop_while_iteration(needle, haystack):
+    count = len(haystack)
+
+    if count == 0:
+        return -1
+
+    start = 0
+    end = int(count/2)
+
+    max_iterations = int(count / 2) + 1
+    i = 0
+
+    while start != end:
+        if needle == haystack[end]:
+            start = end
+        elif needle > haystack[end]:
+            start = end
+            end += int((count-end)/2)
+        elif needle < haystack[end]:
+            end = int((end-start)/2)
+        i += 1
+        if i > max_iterations:
+            break
+
+    if haystack[end] == needle:
+        return end
+    return -1
