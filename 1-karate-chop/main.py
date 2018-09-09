@@ -72,3 +72,42 @@ def binary_chop_while_iteration(needle, haystack):
     if haystack[end] == needle:
         return end
     return -1
+
+
+# In this approach there is no need to pass 'global' haystack index as it's assigned as a key to every value
+# Also instead of dict it could be a list of tuples (global_index, value)
+# Downside: have to iterate all values to build a dict at the beginning
+# Errors: endless recursion (had to add `elif middle_point == first_index`)
+def binary_chop_dict_recursive(needle, haystack):
+
+    i = 0
+    haystack_dict = {}
+    for val in haystack:
+        haystack_dict[str(i)] = val
+        i += 1
+
+    return _chop_dict_recursive(needle, haystack_dict)
+
+
+def _chop_dict_recursive(needle, haystack: dict):
+    count = len(haystack)
+
+    if count == 0:
+        return -1
+
+    first_index = int(next(iter(haystack)))
+    last_index = first_index + count
+
+    middle_point = first_index + int((last_index-first_index) / 2)
+    middle_point_str = str(middle_point)
+
+    if needle == haystack[middle_point_str]:
+        return middle_point
+    elif middle_point == first_index:
+        return -1
+    elif needle > haystack[middle_point_str]:
+        return _chop_dict_recursive(needle, dict(list(haystack.items())[middle_point+1:]))
+    elif needle < haystack[middle_point_str]:
+        return _chop_dict_recursive(needle, dict(list(haystack.items())[:middle_point]))
+
+
