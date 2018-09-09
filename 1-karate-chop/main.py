@@ -3,25 +3,22 @@
 
 # errors:
 # we don't have initial index when recurring
-def binary_chop_recursive(_needle, _haystack):
+def binary_chop_recursive(needle, haystack, i=0):
 
-    def __binary_chop(needle, haystack, i):
-        count = len(haystack)
+    count = len(haystack)
 
-        if count == 0:
-            return -1
+    if count == 0:
+        return -1
 
-        middle_point = int(count / 2)
+    middle_point = int(count / 2)
 
-        if needle == haystack[middle_point]:
-            return i + middle_point
-        elif needle > haystack[middle_point]:
-            i += middle_point+1
-            return __binary_chop(needle, haystack[middle_point + 1:], i)
-        elif needle < haystack[middle_point]:
-            return __binary_chop(needle, haystack[:middle_point], i)
-
-    return __binary_chop(_needle, _haystack, 0)
+    if needle == haystack[middle_point]:
+        return i + middle_point
+    elif needle > haystack[middle_point]:
+        i += middle_point+1
+        return binary_chop_recursive(needle, haystack[middle_point + 1:], i)
+    elif needle < haystack[middle_point]:
+        return binary_chop_recursive(needle, haystack[:middle_point], i)
 
 
 # note: every time i have to look at test data and go step by step
@@ -62,7 +59,7 @@ def binary_chop_while_iteration(needle, haystack):
     max_iterations = int(count / 2) + 1
     i = 0
 
-    while start != end:
+    while start != end and i <= max_iterations:
         if needle == haystack[end]:
             start = end
         elif needle > haystack[end]:
@@ -71,8 +68,6 @@ def binary_chop_while_iteration(needle, haystack):
         elif needle < haystack[end]:
             end = int((end-start)/2)
         i += 1
-        if i > max_iterations:
-            break
 
     if haystack[end] == needle:
         return end
