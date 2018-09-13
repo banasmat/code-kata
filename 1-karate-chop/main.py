@@ -122,3 +122,41 @@ def _chop_dict_recursive(needle, haystack: dict):
         return _chop_dict_recursive(needle, dict(list(haystack.items())[:chunk_mid]))
 
 
+# errors: results order
+def binary_chop_multiple_results(needle, haystack):
+    count = len(haystack)
+
+    if count == 0:
+        return tuple()
+
+    haystack_index = int(count / 2)
+    max_iterations = haystack_index + 1
+    prev_index = count
+
+    results = []
+
+    for i in range(0, max_iterations):
+        _prev_index = haystack_index
+
+        if needle == haystack[haystack_index]:
+            result_index = haystack_index
+            try:
+                while needle == haystack[result_index]:
+                    results.append(result_index)
+                    result_index += 1
+                result_index = haystack_index-1
+                while needle == haystack[result_index]:
+                    results.append(result_index)
+                    result_index -= 1
+            except IndexError:
+                pass
+            return tuple(sorted(results))
+        elif needle > haystack[haystack_index]:
+            haystack_index += int((count - haystack_index)/2)
+        elif needle < haystack[haystack_index]:
+            haystack_index -= abs(int((prev_index - haystack_index)/2))
+            if _prev_index == haystack_index:
+                haystack_index -= 1
+        prev_index = _prev_index
+
+    return tuple()
