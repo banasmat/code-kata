@@ -1,6 +1,7 @@
 import pytest
 from main_2 import *
 
+
 test_data = [
     ('000000000', '''
  _  _  _  _  _  _  _  _  _     
@@ -69,7 +70,6 @@ test_data = [
 
     ''')
 ]
-
 
 @pytest.mark.parametrize('expected, arg', test_data)
 def test_decode_number_from_image(expected, arg):
