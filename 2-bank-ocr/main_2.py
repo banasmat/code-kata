@@ -56,7 +56,7 @@ num_dict = {
 }
 
 
-def decode_number_from_image(num_image: str) -> str:
+def decode_number_from_image(num_image: str, validate=True) -> str:
 
     input_w = 27
     chars_len = 9
@@ -75,22 +75,31 @@ def decode_number_from_image(num_image: str) -> str:
             char_matrix[char_num][i][j - char_w * char_num] = char
 
     result = []
+    suffix = ''
 
     for char_set in char_matrix:
+        num_valid = False
         for readable_num, num_image in num_dict.items():
             if char_set == num_image:
                 result.append(readable_num)
+                num_valid = True
+                break
+        if not num_valid:
+            result.append('?')
+            suffix = ' ILL'
 
-    return ''.join(result)
+    result = ''.join(result)
+    if validate and suffix == '' and not is_number_valid(result):
+        suffix = ' ERR'
+
+    return result + suffix
 
 
 def is_number_valid(number: str) -> bool:
-    cheksum = 0
+    checksum = 0
     i = 1
     for digit in reversed(number):
-        cheksum += i * int(digit)
+        checksum += i * int(digit)
         i += 1
 
-    print(cheksum)
-
-    return cheksum % 11 == 0
+    return checksum % 11 == 0
