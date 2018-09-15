@@ -1,5 +1,7 @@
 # https://codingdojo.org/kata/BankOCR/
 
+from functools import reduce
+
 num_dict = {
     '0': [
         [' ', '_', ' '],
@@ -80,3 +82,15 @@ def decode_number_from_image(num_image: str) -> str:
                 result.append(readable_num)
 
     return ''.join(result)
+
+
+def is_number_valid(number: str) -> bool:
+    cheksum = 0
+    i = 1
+    for digit in reversed(number):
+        cheksum += i * int(digit)
+        i += 1
+
+    print(cheksum)
+
+    return cheksum % 11 == 0

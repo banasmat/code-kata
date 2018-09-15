@@ -2,7 +2,7 @@ import pytest
 from main_2 import *
 
 
-test_data = [
+test_number_images = [
     ('000000000', '''
  _  _  _  _  _  _  _  _  _     
 | || || || || || || || || |
@@ -71,6 +71,22 @@ test_data = [
     ''')
 ]
 
-@pytest.mark.parametrize('expected, arg', test_data)
+test_numbers_for_validation = [
+    (True, '000000000'),
+    (True, '000000051'),
+    (True, '123456789'),
+    (True, '345882865'),
+    (False, '000000052'),
+    (False, '111111111'),
+    (False, '987654321'),
+]
+
+
+@pytest.mark.parametrize('expected, arg', test_number_images)
 def test_decode_number_from_image(expected, arg):
     assert decode_number_from_image(arg) == expected
+
+
+@pytest.mark.parametrize('expected, arg', test_numbers_for_validation)
+def test_number_validation(expected, arg):
+    assert is_number_valid(arg) == expected
