@@ -3,88 +3,90 @@
 from functools import reduce
 
 num_dict = {
-    '0': [
-        [' ', '_', ' '],
-        ['|', ' ', '|'],
-        ['|', '_', '|']
-    ],
-    '1': [
-        [' ', ' ', ' '],
-        [' ', ' ', '|'],
-        [' ', ' ', '|']
-    ],
-    '2': [
-        [' ', '_', ' '],
-        [' ', '_', '|'],
-        ['|', '_', ' ']
-    ],
-    '3': [
-        [' ', '_', ' '],
-        [' ', '_', '|'],
-        [' ', '_', '|']
-    ],
-    '4': [
-        [' ', ' ', ' '],
-        ['|', '_', '|'],
-        [' ', ' ', '|']
-    ],
-    '5': [
-        [' ', '_', ' '],
-        ['|', '_', ' '],
-        [' ', '_', '|']
-    ],
-    '6': [
-        [' ', '_', ' '],
-        ['|', '_', ' '],
-        ['|', '_', '|']
-    ],
-    '7': [
-        [' ', '_', ' '],
-        [' ', ' ', '|'],
-        [' ', ' ', '|']
-    ],
-    '8': [
-        [' ', '_', ' '],
-        ['|', '_', '|'],
-        ['|', '_', '|']
-    ],
-    '9': [
-        [' ', '_', ' '],
-        ['|', '_', '|'],
-        [' ', '_', '|']
-    ],
+    (
+        (' ', '_', ' '),
+        ('|', ' ', '|'),
+        ('|', '_', '|')
+    ): '0',
+    (
+        (' ', ' ', ' '),
+        (' ', ' ', '|'),
+        (' ', ' ', '|')
+    ): '1',
+    (
+        (' ', '_', ' '),
+        (' ', '_', '|'),
+        ('|', '_', ' ')
+    ): '2',
+    (
+        (' ', '_', ' '),
+        (' ', '_', '|'),
+        (' ', '_', '|')
+    ): '3',
+    (
+        (' ', ' ', ' '),
+        ('|', '_', '|'),
+        (' ', ' ', '|')
+    ): '4',
+    (
+        (' ', '_', ' '),
+        ('|', '_', ' '),
+        (' ', '_', '|')
+    ): '5',
+    (
+        (' ', '_', ' '),
+        ('|', '_', ' '),
+        ('|', '_', '|')
+    ): '6',
+    (
+        (' ', '_', ' '),
+        (' ', ' ', '|'),
+        (' ', ' ', '|')
+    ): '7',
+    (
+        (' ', '_', ' '),
+        ('|', '_', '|'),
+        ('|', '_', '|')
+    ): '8',
+    (
+        (' ', '_', ' '),
+        ('|', '_', '|'),
+        (' ', '_', '|')
+    ): '9',
 }
 
+char_h = 3
+char_w = 3
 
 def decode_number_from_image(num_image: str, validate=True) -> str:
 
     input_w = 27
     chars_len = 9
-    char_h = 3
-    char_w = 3
 
-    char_matrix = [[[' ' for x in range(char_w)] for y in range(char_h)] for z in range(chars_len)]
+    nums_matrix = [[[' ' for x in range(char_w)] for y in range(char_h)] for z in range(chars_len)]
 
-    for i, line in enumerate(num_image.splitlines()[1:4]):
-        char_num = 0
-        for j, char in enumerate(line.strip('\n')[:input_w]):
-            if j > 0 and j % char_w == 0:
-                char_num += 1
-                if char_num > chars_len:
-                    char_num = 0
-            char_matrix[char_num][i][j - char_w * char_num] = char
+    for row_i, line in enumerate(num_image.splitlines()[1:4]):
+        num_i = 0
+        for char_i, char in enumerate(line.strip('\n')[:input_w]):
+            if char_i > 0 and char_i % char_w == 0:
+                num_i += 1
+                if num_i > chars_len:
+                    num_i = 0
+            nums_matrix[num_i][row_i][char_i - char_w * num_i] = char
+
+    # Converting to tuples for faster dict search
+    for num_i, num in enumerate(nums_matrix):
+        for row_i, row in enumerate(nums_matrix[num_i]):
+            nums_matrix[num_i][row_i] = tuple(nums_matrix[num_i][row_i])
+        nums_matrix[num_i] = tuple(nums_matrix[num_i])
 
     result = []
     suffix = ''
 
-    for char_set in char_matrix:
-        num_valid = False
-        for readable_num, num_image in num_dict.items():
-            if char_set == num_image:
-                result.append(readable_num)
-                num_valid = True
-                break
-        if not num_valid:
+    for num in nums_matrix:
+        try:
+            result.append(num_dict[num])
+        except KeyError:
             result.append('?')
             suffix = ' ILL'
 
@@ -93,6 +95,10 @@ def decode_number_from_image(num_image: str, validate=True) -> str:
         suffix = ' ERR'
 
     return result + suffix
+
+
+def find_similar_numbers(number_image, recognized_number=None):
+    pass
 
 
 def is_number_valid(number: str) -> bool:
