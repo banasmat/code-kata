@@ -83,16 +83,45 @@ def decode_number_from_image(num_image: str, validate=True) -> str:
     result = []
     suffix = ''
 
-    for num in nums_matrix:
+    replacement_map = {}
+
+    for i, num in enumerate(nums_matrix):
         try:
             result.append(num_dict[num])
         except KeyError:
+            replacements = find_similar_numbers(num)
+            if len(replacements) > 0:
+                replacement_map[str(i)] = replacements
             result.append('?')
             suffix = ' ILL'
 
-    result = ''.join(result)
+    if len(replacement_map) == 1:
+        replacement_i, replacement_vals = replacement_map.popitem()
+
+        replacement_i = int(replacement_i)
+        replacement_vals = list(replacement_vals)
+
+        initial_val = result[replacement_i]
+        amb_results = []
+
+        for replacement_val in replacement_vals:
+            result[replacement_i] = replacement_val
+            if is_number_valid(result):
+                amb_results.append(''.join(result))
+            else:
+                replacement_vals.remove(replacement_val)
+
+        if len(replacement_vals) == 1:
+            result[replacement_i] = replacement_vals[0]
+            suffix = ''
+        elif len(replacement_vals) > 1:
+            result[replacement_i] = initial_val
+            suffix = ' AMB ' + ', '.join(amb_results)
+
     if validate and suffix == '' and not is_number_valid(result):
         suffix = ' ERR'
+
+    result = ''.join(result)
 
     return result + suffix
 
