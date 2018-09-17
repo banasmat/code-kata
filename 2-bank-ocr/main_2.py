@@ -56,7 +56,7 @@ num_dict = {
 }
 
 
-def decode_number_from_image(num_image: str, validate=True) -> str:
+def decode_number_from_image(num_image: str, validate=True) -> tuple:
 
     input_w = 27
     chars_len = 9
@@ -81,6 +81,7 @@ def decode_number_from_image(num_image: str, validate=True) -> str:
         nums_matrix[num_i] = tuple(nums_matrix[num_i])
 
     result = []
+    result_alternatives = []
     suffix = ''
 
     replacement_map = {}
@@ -102,12 +103,12 @@ def decode_number_from_image(num_image: str, validate=True) -> str:
         replacement_vals = list(replacement_vals)
 
         initial_val = result[replacement_i]
-        amb_results = []
+        valid_alternatives = []
 
         for replacement_val in replacement_vals:
             result[replacement_i] = replacement_val
             if is_number_valid(result):
-                amb_results.append(''.join(result))
+                valid_alternatives.append(''.join(result))
             else:
                 replacement_vals.remove(replacement_val)
 
@@ -116,14 +117,38 @@ def decode_number_from_image(num_image: str, validate=True) -> str:
             suffix = ''
         elif len(replacement_vals) > 1:
             result[replacement_i] = initial_val
-            suffix = ' AMB ' + ', '.join(amb_results)
+            suffix = ' AMB'
+            result_alternatives = valid_alternatives
 
     if validate and suffix == '' and not is_number_valid(result):
-        suffix = ' ERR'
+
+        valid_alternatives = []
+
+        for i, num in enumerate(result):
+            similar_numbers = find_similar_numbers(nums_matrix[i], num)
+
+            for similar_number in similar_numbers:
+                _result = result.copy()
+                _result[i] = similar_number
+                if is_number_valid(''.join(_result)):
+                    valid_alternatives.append(_result)
+
+        len_valid_alternatives = len(valid_alternatives)
+        if len_valid_alternatives == 0:
+            suffix = ' ERR'
+        elif len_valid_alternatives == 1:
+            suffix = ''
+            result = valid_alternatives.pop()
+        else:
+            valid_alternatives = list((map(lambda x: ''.join(x), valid_alternatives)))
+            suffix = ' AMB'
+            result_alternatives = valid_alternatives
 
     result = ''.join(result)
 
-    return result + suffix
+    return result + suffix, result_alternatives
+
+# def __find_possible_replacements()
 
 
 def is_number_valid(number: str) -> bool:
@@ -141,7 +166,10 @@ def find_similar_numbers(number_image, recognized_number=None) -> tuple:
     _num_dict = num_dict.copy()
 
     if recognized_number is not None:
-        del _num_dict[recognized_number]
+        for img, num in _num_dict.items():  # for name, age in dictionary.iteritems():  (for Python 2.x)
+            if num == recognized_number:
+                del _num_dict[img]
+                break
 
     results = []
 
