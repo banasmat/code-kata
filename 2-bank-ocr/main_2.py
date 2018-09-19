@@ -1,7 +1,5 @@
 # https://codingdojo.org/kata/BankOCR/
 
-from functools import reduce
-
 num_dict = {
     (
         (' ', '_', ' '),
@@ -58,16 +56,21 @@ num_dict = {
 
 def decode_number_from_image(num_image: str, validate=True) -> tuple:
 
-    input_w = 27
-    chars_len = 9
-    char_h = 3
-    char_w = 3
+    nums_matrix = _create_matrix_from_input_image(num_image)
+    result_elements, result_suffix, result_alternatives = _match_numbers(nums_matrix)
+    result_elements, result_suffix, result_alternatives = _validate_result(nums_matrix, result_elements, result_suffix, result_alternatives, validate)
+
+    return ''.join(result_elements) + result_suffix, result_alternatives
+
+
+def _create_matrix_from_input_image(num_image, chars_len=9, char_w=3, char_h=3):
+    num_image_w = chars_len * char_w
 
     nums_matrix = [[[' ' for x in range(char_w)] for y in range(char_h)] for z in range(chars_len)]
 
     for row_i, line in enumerate(num_image.splitlines()[1:4]):
         num_i = 0
-        for char_i, char in enumerate(line.strip('\n')[:input_w]):
+        for char_i, char in enumerate(line.strip('\n')[:num_image_w]):
             if char_i > 0 and char_i % char_w == 0:
                 num_i += 1
                 if num_i > chars_len:
@@ -80,75 +83,81 @@ def decode_number_from_image(num_image: str, validate=True) -> tuple:
             nums_matrix[num_i][row_i] = tuple(nums_matrix[num_i][row_i])
         nums_matrix[num_i] = tuple(nums_matrix[num_i])
 
-    result = []
+    return nums_matrix
+
+
+def _match_numbers(nums_matrix):
+    result_elements = []
     result_alternatives = []
-    suffix = ''
+    result_suffix = ''
 
     replacement_map = {}
 
     for i, num in enumerate(nums_matrix):
         try:
-            result.append(num_dict[num])
+            result_elements.append(num_dict[num])
         except KeyError:
             replacements = find_similar_numbers(num)
             if len(replacements) > 0:
                 replacement_map[str(i)] = replacements
-            result.append('?')
-            suffix = ' ILL'
+            result_elements.append('?')
+            result_suffix = ' ILL'
 
+    # If one element can't be recognized, find closest valid match TODO shouldn't it be moved to validate function ?
     if len(replacement_map) == 1:
         replacement_i, replacement_vals = replacement_map.popitem()
 
         replacement_i = int(replacement_i)
         replacement_vals = list(replacement_vals)
 
-        initial_val = result[replacement_i]
+        initial_val = result_elements[replacement_i]
         valid_alternatives = []
 
         for replacement_val in replacement_vals:
-            result[replacement_i] = replacement_val
-            if is_number_valid(result):
-                valid_alternatives.append(''.join(result))
+            result_elements[replacement_i] = replacement_val
+            if is_number_valid(result_elements):
+                valid_alternatives.append(''.join(result_elements))
             else:
                 replacement_vals.remove(replacement_val)
 
         if len(replacement_vals) == 1:
-            result[replacement_i] = replacement_vals[0]
-            suffix = ''
+            result_elements[replacement_i] = replacement_vals[0]
+            result_suffix = ''
         elif len(replacement_vals) > 1:
-            result[replacement_i] = initial_val
-            suffix = ' AMB'
+            result_elements[replacement_i] = initial_val
+            result_suffix = ' AMB'
             result_alternatives = valid_alternatives
 
-    if validate and suffix == '' and not is_number_valid(result):
+    return result_elements, result_suffix, result_alternatives
+
+
+def _validate_result(nums_matrix, result_elements, result_suffix, result_alternatives, validate=True):
+
+    if validate and result_suffix == '' and not is_number_valid(result_elements):
 
         valid_alternatives = []
 
-        for i, num in enumerate(result):
+        for i, num in enumerate(result_elements):
             similar_numbers = find_similar_numbers(nums_matrix[i], num)
 
             for similar_number in similar_numbers:
-                _result = result.copy()
+                _result = result_elements.copy()
                 _result[i] = similar_number
                 if is_number_valid(''.join(_result)):
                     valid_alternatives.append(_result)
 
         len_valid_alternatives = len(valid_alternatives)
         if len_valid_alternatives == 0:
-            suffix = ' ERR'
+            result_suffix = ' ERR'
         elif len_valid_alternatives == 1:
-            suffix = ''
-            result = valid_alternatives.pop()
+            result_suffix = ''
+            result_elements = valid_alternatives.pop()
         else:
             valid_alternatives = list((map(lambda x: ''.join(x), valid_alternatives)))
-            suffix = ' AMB'
+            result_suffix = ' AMB'
             result_alternatives = valid_alternatives
 
-    result = ''.join(result)
-
-    return result + suffix, result_alternatives
-
-# def __find_possible_replacements()
+    return result_elements, result_suffix, result_alternatives
 
 
 def is_number_valid(number: str) -> bool:
